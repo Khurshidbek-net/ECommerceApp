@@ -1,0 +1,30 @@
+﻿@model IEnumerable<E_Commerce.Mvc.Models.Product>
+
+
+<h2>Products</h2>
+<table class="styled-table table-responsive">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Description</td>
+                <td>@product.Price $</td> <!-- Format price as currency -->
+                <td>
+                    <img src="@(string.Concat("https://localhost:7035", product.ImageUrl))" alt="@product.Name" style="width:100px;height:auto;" />
+                </td>
+                <td>@product.Category</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

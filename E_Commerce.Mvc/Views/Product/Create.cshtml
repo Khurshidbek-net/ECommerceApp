@@ -1,0 +1,28 @@
+﻿@model ProductViewModel
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div>
+        <label>Name</label>
+        <input type="text" asp-for="Name" />
+    </div>
+    <div>
+        <label>Description</label>
+        <input type="text" asp-for="Description" />
+    </div>
+    <div>
+        <label>Price</label>
+        <input type="number" asp-for="Price" step="0.01" />
+    </div>
+    <div>
+        <label>Category</label>
+        <select asp-for="Category">
+            <option value="Books">Books</option>
+            <option value="Electronics">Electronics</option>
+        </select>
+    </div>
+    <div>
+        <label>Upload Image</label>
+        <input type="file" asp-for="ImageFile" />
+    </div>
+    <button type="submit">Create</button>
+</form>

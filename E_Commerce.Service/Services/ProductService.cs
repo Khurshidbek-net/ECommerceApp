@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using E_Commerce.Data.Repositories;
 using E_Commerce.Domain.Entities;
+using E_Commerce.Domain.Enums;
 using E_Commerce.Service.DTOs.Product;
 using E_Commerce.Service.Exceptions;
 using E_Commerce.Service.Interfaces;
@@ -70,6 +71,12 @@ public class ProductService : IProductService
         if (product == null)
             throw new CustomException("Product not found", 404);
         return product;
+    }
+
+    public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(Category category)
+    {
+        var products = _genericRepository.GetAll(x => x.Category == category);
+        return await Task.FromResult(products);
     }
 
     public async Task<Product> UpdateProductAsync(ProductUpdateDto productDto)

@@ -1,0 +1,43 @@
+﻿@model IEnumerable<E_Commerce.Mvc.Models.PromoCode>
+
+<div class="promo-container">
+    <h1 class="promo-title">Promo Codes</h1>
+
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Discount (%)</th>
+                <th>Status</th>
+                <th>Expiration Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var promo in Model)
+            {
+                <tr>
+                    <td>@promo.Code</td>
+                    <td>@promo.DiscountPercent %</td>
+                    <td>
+                        <span class="status @((promo.IsActive ? "active" : "inactive"))">
+                            @(promo.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </td>
+                    <td>@promo.ExpireDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        <button onclick="window.location.href='@Url.Action("Edit", new { code = promo.Code })'"
+                                class="btn-action btn-edit">
+                            Edit
+                        </button>
+                        <button onclick="if(confirm('Are you sure you want to delete this promo code?'))
+                                window.location.href='@Url.Action("Delete", new { code = promo.Code })'"
+                                class="btn-action btn-delete">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

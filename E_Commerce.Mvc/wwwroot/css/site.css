@@ -53,3 +53,374 @@ body {
 .styled-table tbody tr:hover {
     background-color: #f1f1f1;
 }
+
+
+
+/*Product create*/
+
+.product-create-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 10px;
+    background: #f9f9f9;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Form Title Styling */
+.form-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #4CAF50;
+}
+
+/* Input and Textarea Styling */
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+    /* Focus State for Form Fields */
+    .form-control:focus {
+        border-color: #4CAF50;
+        box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+    }
+
+/* Button Styling */
+.btn-create {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+}
+
+    /* Hover State for Button */
+    .btn-create:hover {
+        background: linear-gradient(45deg, #8BC34A, #4CAF50);
+        transform: translateY(-2px);
+    }
+
+/* Error Message Styling */
+.text-danger {
+    font-size: 12px;
+    color: #ff0000;
+    margin-top: 5px;
+}
+
+/* Form Group Spacing */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .product-create-container {
+        padding: 20px;
+        margin: 20px auto;
+    }
+}
+
+    
+
+
+
+
+
+/* Login page*/
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.form-control {
+    padding-left: 2.5rem; 
+    border-radius: 5px;
+    position: relative;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    color: rgba(0, 0, 0, 0.7);
+    margin-top: 1rem;
+    z-index: 1;
+}
+
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #4CAF50;
+}
+
+.btn-login {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-top: 20px;
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 400;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.5s, transform 0.5s;
+}
+
+.btn-login:hover {
+    background: linear-gradient(45deg, #8BC34A, #4CAF50);
+    transform: translateY(-2px);
+}
+
+.alert-danger {
+    margin-top: 1rem;
+}
+
+.position-relative {
+    position: relative;
+}
+
+.text-danger {
+    position: absolute;
+    bottom: -25px; /* Position the error message below the input */
+    left: 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.form-group {
+    margin-bottom: 5rem; /* Increase bottom margin to avoid overlap with the error message */
+}
+
+
+
+
+
+
+
+/*Register page*/
+
+/* Registration Container */
+.registration-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 10px;
+    background: #f9f9f9;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Form Title */
+.form-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #4CAF50;
+}
+
+/* Form Group Styling */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Label Styling */
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+/* Input and Textarea Styling */
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+    /* Focus State for Inputs */
+    .form-control:focus {
+        border-color: #4CAF50;
+        box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+    }
+
+/* Button Styling */
+.btn-register {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+}
+
+    /* Hover State for Button */
+    .btn-register:hover {
+        background: linear-gradient(45deg, #8BC34A, #4CAF50);
+        transform: translateY(-2px);
+    }
+
+/* Error Message Styling */
+.text-danger {
+    font-size: 12px;
+    color: #ff0000;
+    margin-top: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .registration-container {
+        padding: 20px;
+        margin: 20px auto;
+    }
+}
+
+
+/*Promo code page*/
+
+.promo-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.promo-title {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #4CAF50;
+}
+
+/* Table Styling */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 18px;
+    text-align: left;
+}
+
+    .styled-table thead tr {
+        background-color: #4CAF50;
+        color: #fff;
+        text-align: left;
+    }
+
+    .styled-table th,
+    .styled-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .styled-table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+/* Button Styling */
+.btn-action {
+    padding: 8px 16px;
+    margin: 5px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-edit {
+    background-color: #FFC107;
+}
+
+    .btn-edit:hover {
+        background-color: #FFB300;
+        transform: translateY(-2px);
+    }
+
+.btn-delete {
+    background-color: #F44336;
+}
+
+    .btn-delete:hover {
+        background-color: #E53935;
+        transform: translateY(-2px);
+    }
+
+/* Status Styling */
+.status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+    .status.active {
+        background-color: #8BC34A;
+        color: white;
+    }
+
+    .status.inactive {
+        background-color: #F44336;
+        color: white;
+    }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .promo-container {
+        padding: 10px;
+    }
+
+    .styled-table th,
+    .styled-table td {
+        font-size: 16px;
+    }
+}
+
+
+
+

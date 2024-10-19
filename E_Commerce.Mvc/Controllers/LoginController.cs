@@ -1,7 +1,6 @@
 ﻿using E_Commerce.Mvc.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using System.Text;
 
 namespace E_Commerce.Mvc.Controllers
 {
@@ -14,53 +13,78 @@ namespace E_Commerce.Mvc.Controllers
             _httpClient = httpClientFactory.CreateClient("LoginClient");
         }
 
-        public IActionResult Index()
+        public IActionResult Login()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Index(LoginModel loginModel)
+        public async Task<IActionResult> Login(LoginModel model)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View(loginModel);
-            }
-
-            var loginJson = JsonSerializer.Serialize(loginModel);
-            var content = new StringContent(loginJson, Encoding.UTF8, "application/json");
-
-            try
-            {
-                // Send login request to the API
-                var response = await _httpClient.PostAsync("api/auth/login", content);
-
-                if (response.IsSuccessStatusCode)
+                var loginData = new
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
+                    Email = model.Email,
+                    Password = model.Password
+                };
 
-                    // Parse the response if a token or other info is returned
-                    var token = JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent)?["token"];
+                var httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7035/") };
+                var loginResponse = await httpClient.PostAsJsonAsync("api/auth/login", loginData);
 
-                    // Save the token in session or cookie if necessary
-                    HttpContext.Session.SetString("AuthToken", token);
+                if (loginResponse.IsSuccessStatusCode)
+                {
 
-                    // Redirect to Home page on successful login
-                    return RedirectToAction("Index", "Home");
+                    var loginResultJson = await loginResponse.Content.ReadAsStringAsync();
+                    using var jsonDoc = JsonDocument.Parse(loginResultJson);
+
+                    // Extract the values manually
+                    string accessToken = jsonDoc.RootElement.GetProperty("token").GetString();
+                    string refreshToken = jsonDoc.RootElement.GetProperty("refreshToken").GetString();
+
+
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        // Store the access token in session or a secure cookie
+                        var cookieOptions = new CookieOptions
+                        {
+                            HttpOnly = true, // Prevents access to the cookie from JavaScript
+                            Secure = true,   // Ensures the cookie is sent only over HTTPS
+                            Expires = DateTimeOffset.UtcNow.AddMinutes(30) // Set cookie expiration
+                        };
+
+                        Response.Cookies.Append("AccessToken", accessToken, cookieOptions);
+
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Failed to retrieve the access token.");
+                    }
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt. Please check your credentials.");
-                    return View(loginModel);
+                    TempData["ErrorMessage"] = "Email or password is incorrect.";
                 }
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, "An error occurred while processing your request. Please try again.");
-                Console.WriteLine($"Exception during login: {ex.Message}");
-                return View(loginModel);
-            }
+
+            return View(model);
         }
 
+        //[HttpPost]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("AccessToken");
+            var token = Request.Cookies["AccessToken"];
+            return RedirectToAction("Index", "Home");
+        }
+
+
     }
+    public class AuthResponse
+    {
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
+    }
+
 }

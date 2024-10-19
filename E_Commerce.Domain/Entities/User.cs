@@ -11,5 +11,7 @@ public class User : Auditable
     public string Password { get; set; }
     public string PhoneNumber { get; set; }
     public string City { get; set; }
+    public string RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiry { get; set; }
     public UserRole Role { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using E_Commerce.Data.Contexts;
 using E_Commerce.Data.Repositories;
 using E_Commerce.Domain.Entities;
 using E_Commerce.Service.DTOs.User;
@@ -20,12 +21,25 @@ namespace E_Commerce.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<UserCreateDto> CreateUserAsync(UserCreateDto userCreateDto)
+        public async Task<UserCreateDto>  CreateUserAsync(UserCreateDto userCreateDto)
         {
-            var user = _mapper.Map<User>(userCreateDto);
+            var user = new User
+            {
+                FirstName = userCreateDto.FirstName,
+                LastName = userCreateDto.LastName,
+                Email = userCreateDto.Email,
+                Password = userCreateDto.Password, // Consider hashing the password
+                PhoneNumber = userCreateDto.PhoneNumber,
+                City = userCreateDto.City,
+                Role = userCreateDto.Role,
+                RefreshToken = Guid.NewGuid().ToString(), // Generate a new token
+                RefreshTokenExpiry = DateTime.UtcNow.AddMinutes(10) // Set token expiry, for example, 30 days
+            };
+
             await _userRepository.CreateAsync(user);
             await _userRepository.SaveChangesAsync();
-            return userCreateDto;
+            return _mapper.Map<UserCreateDto>(user);
+
         }
 
         public async Task<bool> DeleteUserAsync(long id)
@@ -65,7 +79,12 @@ namespace E_Commerce.Service.Services
             return await query.FirstOrDefaultAsync(expression);
         }
 
-
+        public async Task<User> GetUserByRefreshToken(string refreshToken)
+        {
+            var user = await _userRepository.GetAll(null!).
+                FirstOrDefaultAsync(x => x.RefreshToken == refreshToken && x.RefreshTokenExpiry > DateTime.UtcNow);
+            return user;
+        }
 
         public async Task<UserUpdateDto> UpdateUserAsync(UserUpdateDto userUpdateDto)
         {
@@ -75,6 +94,13 @@ namespace E_Commerce.Service.Services
             _userRepository.Update(user);
             await _userRepository.SaveChangesAsync();
             return userUpdateDto;
+        }
+
+        public async Task<bool> UserExistsAsync(string email)
+        {
+            // Check if a user with the given email exists
+            return await _userRepository.GetAll(null!)
+                .AnyAsync(u => u.Email == email);
         }
     }
 }

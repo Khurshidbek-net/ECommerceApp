@@ -56,7 +56,7 @@ namespace E_Commerce.API.Controllers
         }
 
 
-        [Authorize(Roles = "ProductOwner")]
+        //[Authorize(Roles = "ProductOwner")]
         [HttpPost("create-promo")]
         public async Task<ActionResult<PromoCode>> CreatePromo([FromForm] PromoCreateDto promoCode)
             => Ok(await _promoService.CreatePromoCode(promoCode));

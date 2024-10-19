@@ -15,6 +15,8 @@ namespace E_Commerce.Service.Interfaces
         Task<User> GetUser(Expression<Func<User, bool>> expression, string[] includes = null, bool isTracking = true);
         Task<UserCreateDto> CreateUserAsync(UserCreateDto userCreateDto);
         Task<UserUpdateDto> UpdateUserAsync(UserUpdateDto userUpdateDto);
+        Task<User> GetUserByRefreshToken(string refreshToken);
         Task<bool> DeleteUserAsync(long id);
+        Task<bool> UserExistsAsync(string email);
     }
 }

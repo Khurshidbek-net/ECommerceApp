@@ -1,4 +1,5 @@
 ﻿using E_Commerce.Domain.Enums;
+using E_Commerce.Service.DTOs;
 using E_Commerce.Service.DTOs.User;
 using E_Commerce.Service.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace E_Commerce.API.Controllers
@@ -24,23 +26,83 @@ namespace E_Commerce.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromForm] UserLoginDto userLogin)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto userLogin)
         {
-            if(userLogin == null)
+            if (userLogin == null)
                 return BadRequest("User data is required");
             if (string.IsNullOrEmpty(userLogin.Email) || string.IsNullOrEmpty(userLogin.Password))
                 return BadRequest("Please provide username and password");
 
             var user = await _userService.GetUser(x => x.Email == userLogin.Email && x.Password == userLogin.Password);
-            if(user == null)
+            if (user == null)
                 return BadRequest("Invalid username or password");
 
-            if(user.Role.ToString() != "ProductOwner" && user.Role.ToString() != "SuperAdmin")
+            if (user.Role.ToString() != "ProductOwner" && user.Role.ToString() != "SuperAdmin")
                 return StatusCode(StatusCodes.Status403Forbidden, "Access is restricted based on your role.");
 
+            // Generate access token
             var token = GenerateJwtToken(user.FirstName, user.Role.ToString());
-            return Ok(new { Token = token });
 
+            // Generate refresh token
+            var refreshToken = GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7); // Set expiry for the refresh token (e.g., 7 days)
+
+            var userUpdateDto = new UserUpdateDto
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                City = user.City,
+                Password = user.Password,
+                RefreshToken = refreshToken,
+                RefreshTokenExpiry = user.RefreshTokenExpiry
+            };
+            await _userService.UpdateUserAsync(userUpdateDto); 
+
+            return Ok(new { Token = token, RefreshToken = refreshToken });
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRefreshDto tokenRefreshDto)
+        {
+            if (tokenRefreshDto == null || string.IsNullOrEmpty(tokenRefreshDto.RefreshToken))
+                return BadRequest("Refresh token is required");
+
+            // Get user by refresh token
+            var user = await _userService.GetUserByRefreshToken(tokenRefreshDto.RefreshToken);
+            if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
+                return Unauthorized("Invalid or expired refresh token");
+
+            // Generate new access token
+            var newToken = GenerateJwtToken(user.FirstName, user.Role.ToString());
+
+            // Optionally, you can generate a new refresh token
+            var newRefreshToken = GenerateRefreshToken();
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddMinutes(2); // Set new expiry for the refresh token
+
+
+            var userUpdateDto = new UserUpdateDto
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                City = user.City,
+                Password = user.Password,
+                RefreshToken = newRefreshToken,
+                RefreshTokenExpiry = user.RefreshTokenExpiry
+            };
+            await _userService.UpdateUserAsync(userUpdateDto); // Save the user with the new refresh token and expiry
+
+            return Ok(new { Token = newToken, RefreshToken = newRefreshToken });
+        }
+
+        private string GenerateRefreshToken()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
 
         private string GenerateJwtToken(string username, string role)

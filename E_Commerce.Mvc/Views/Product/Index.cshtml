@@ -1,30 +1,134 @@
 ﻿@model IEnumerable<E_Commerce.Mvc.Models.Product>
 
-
-<h2>Products</h2>
-<table class="styled-table table-responsive">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Image</th>
-            <th>Category</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var product in Model)
-        {
+<h2 class="product-title">Products</h2>
+<div class="product-container">
+    <table class="styled-table">
+        <thead>
             <tr>
-                <td>@product.Name</td>
-                <td>@product.Description</td>
-                <td>@product.Price $</td> <!-- Format price as currency -->
-                <td>
-                    <img src="@(string.Concat("https://localhost:7035", product.ImageUrl))" alt="@product.Name" style="width:100px;height:auto;" />
-                </td>
-                <td>@product.Category</td>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Image</th>
+                <th>Category</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price $</td>
+                    <td>
+                        <img src="@(string.Concat("https://localhost:7035", product.ImageUrl))" alt="@product.Name" class="product-image" />
+                    </td>
+                    <td>@product.Category</td>
+                    <td>
+                        <button class="btn-action btn-update">Update</button>
+                        <form asp-action="Delete" asp-controller="Product" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@product.Id" />
+                            <button type="submit" class="btn-action btn-delete" onclick="return confirm('Are you sure you want to delete this product?');">Delete</button>
+                        </form>
+                        <button class="btn-action btn-add-promo" onclick="window.location.href='@Url.Action("Create", "Promocode")'">Add Promo Code</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
+<style>
+    .product-title {
+        text-align: center;
+        font-size: 28px;
+        color: #4CAF50;
+        margin-bottom: 30px;
+    }
+
+    .product-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .styled-table thead tr {
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 12px 15px;
+        }
+
+        .styled-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+            .styled-table tbody tr:nth-of-type(even) {
+                background-color: #f3f3f3;
+            }
+
+            .styled-table tbody tr:last-of-type {
+                border-bottom: 2px solid #4CAF50;
+            }
+
+            .styled-table tbody tr:hover {
+                background-color: #eaf8e3;
+            }
+
+    .product-image {
+        width: 100px;
+        height: auto;
+        border-radius: 8px;
+    }
+
+    .btn-action {
+        margin: 5px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #fff;
+        transition: background 0.3s, transform 0.3s;
+    }
+
+    .btn-update {
+        background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    }
+
+        .btn-update:hover {
+            background: linear-gradient(45deg, #8BC34A, #4CAF50);
+            transform: translateY(-2px);
+        }
+
+    .btn-delete {
+        background: linear-gradient(45deg, #f44336, #e57373);
+    }
+
+        .btn-delete:hover {
+            background: linear-gradient(45deg, #e57373, #f44336);
+            transform: translateY(-2px);
+        }
+
+    .btn-add-promo {
+        background: linear-gradient(45deg, #2196F3, #64B5F6);
+        text-decoration: none;
+    }
+
+        .btn-add-promo:hover {
+            background: linear-gradient(45deg, #64B5F6, #2196F3);
+            transform: translateY(-2px);
+        }
+}
+</style>

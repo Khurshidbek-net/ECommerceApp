@@ -1,18 +1,17 @@
-using E_Commerce.Mvc.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Text.Json;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
 using System.Text.Json.Serialization;
+using System.Text.Json;
+using E_Commerce.Mvc.Models;
 
 namespace E_Commerce.Mvc.Controllers
 {
-    public class HomeController : Controller
+    public class PromocodeController : Controller
     {
         private readonly HttpClient _httpClient;
-
-        public HomeController(IHttpClientFactory httpClientFactory)
+        public PromocodeController(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient("ProductClient");
+            _httpClient = httpClientFactory.CreateClient("PromoClient");
         }
 
         public async Task<IActionResult> Index()
@@ -23,7 +22,7 @@ namespace E_Commerce.Mvc.Controllers
                 Converters = { new JsonStringEnumConverter() }
             };
 
-            var response = await _httpClient.GetAsync("api/products/get-all");
+            var response = await _httpClient.GetAsync("api/Promo/get-all-promos");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -31,10 +30,14 @@ namespace E_Commerce.Mvc.Controllers
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            var products = JsonSerializer.Deserialize<IEnumerable<Product>>(content, jsonOptions);
+            var promos = JsonSerializer.Deserialize<IEnumerable<PromoCode>>(content, jsonOptions);
 
-            return View(products);
+            return View(promos);
+        }
+
+        public IActionResult Create()
+        {
+            return View();
         }
     }
-
 }

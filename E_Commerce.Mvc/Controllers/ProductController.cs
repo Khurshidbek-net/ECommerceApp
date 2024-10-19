@@ -38,12 +38,11 @@ public class ProductController : Controller
     }
 
     public IActionResult Create()
-    {
+    {   
         return View();
     }
 
 
-    //[Authorize(Roles = "ProductOwner")]
     [HttpPost]
     public async Task<IActionResult> Create(ProductViewModel model)
     {
@@ -113,11 +112,11 @@ public class ProductController : Controller
         return View(model);
     }
 
-    [HttpPost("delete/{id}")]
+    [HttpPost("delete")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(long id)
     {
-        // Send a DELETE request to the API
-        var response = await _httpClient.DeleteAsync($"api/Products/{id}");
+        var response = await _httpClient.DeleteAsync($"api/products/{id}");
 
         if (!response.IsSuccessStatusCode)
         {

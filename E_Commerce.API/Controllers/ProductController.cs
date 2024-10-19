@@ -55,7 +55,7 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> UpdateAsync([FromForm] ProductUpdateDto product)
         => Ok(await _productService.UpdateProductAsync(product));
 
-    //[Authorize(Roles = "SuperAdmin, ProductOwner")]
+    //[Authorize(Roles = "ProductOwner")]
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> DeleteAsync(long id)
         => Ok(await _productService.DeleteProductAsync(id));

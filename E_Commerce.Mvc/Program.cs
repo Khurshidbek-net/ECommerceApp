@@ -99,9 +99,14 @@ app.UseAuthentication();
 app.UseAuthorization(); // Enables authorization middleware
 
 // Configure endpoints
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers(); // For API controllers
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}"); // Default routing
+});
+
 
 // Run the application
 app.Run();

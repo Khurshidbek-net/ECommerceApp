@@ -7,7 +7,8 @@ namespace E_Commerce.Service.Interfaces
         Task<IEnumerable<PromoCode>> GetAllCodes();
         Task<IEnumerable<PromoCode>> GetActivePromoCodes();
         Task<IEnumerable<PromoCode>> GetInActivePromoCodes();
-        Task<PromoCode> GetPromoCode(long code);
+        Task<PromoCode> GetPromoCode(string code);
+        Task<PromoCode> GetPromoCodeById(long id);
         Task<PromoCode> CreatePromoCode(PromoCreateDto promoCreate);
         Task<PromoCode> UpdatePromoCode(PromoUpdateDto promoUpdate);
         Task<bool> DeletePromoCode(long id);

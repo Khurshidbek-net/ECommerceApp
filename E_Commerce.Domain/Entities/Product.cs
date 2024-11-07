@@ -10,4 +10,7 @@ public class Product : Auditable
     public decimal Price { get; set; }
     public string ImageUrl { get; set; } = null;
     public Category Category { get; set; }
+    public string OwnerId { get; set; }
+    public long? PromocodeId { get; set; }
+    public PromoCode PromoCode { get; set; }
 }

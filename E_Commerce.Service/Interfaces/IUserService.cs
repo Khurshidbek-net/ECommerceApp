@@ -18,5 +18,6 @@ namespace E_Commerce.Service.Interfaces
         Task<User> GetUserByRefreshToken(string refreshToken);
         Task<bool> DeleteUserAsync(long id);
         Task<bool> UserExistsAsync(string email);
+        Task UpdateUserRefreshTokenAsync(long id, string refreshToken, DateTime refreshTokenExpiry);
     }
 }

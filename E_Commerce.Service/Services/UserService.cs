@@ -63,7 +63,7 @@ namespace E_Commerce.Service.Services
         {
             IQueryable<User> query = _userRepository.GetAll(null!);
 
-            if (includes != null)
+            if (includes != null && includes.Any())
             {
                 foreach (var include in includes)
                 {
@@ -76,7 +76,14 @@ namespace E_Commerce.Service.Services
                 query = query.AsNoTracking();
             }
 
-            return await query.FirstOrDefaultAsync(expression);
+            try
+            {
+                return await query.FirstOrDefaultAsync(expression); 
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error fetching user from the database", ex);
+            }
         }
 
         public async Task<User> GetUserByRefreshToken(string refreshToken)
@@ -88,13 +95,38 @@ namespace E_Commerce.Service.Services
 
         public async Task<UserUpdateDto> UpdateUserAsync(UserUpdateDto userUpdateDto)
         {
-            var user = _mapper.Map<User>(userUpdateDto);
-            if (user == null)
+            var existingUser = await _userRepository.GetAsync(x => x.Id == userUpdateDto.Id);
+            if (existingUser == null)
                 throw new CustomException("User not found", 404);
+
+            _mapper.Map(userUpdateDto, existingUser);
+
+            _userRepository.Update(existingUser);
+            await _userRepository.SaveChangesAsync();
+
+            var updatedDto = _mapper.Map<UserUpdateDto>(existingUser); 
+            return updatedDto;
+        }
+
+        public async Task UpdateUserRefreshTokenAsync(long userId, string refreshToken, DateTime refreshTokenExpiry)
+        {
+            // Retrieve the user by their ID
+            var user = await _userRepository.GetAsync(x => x.Id == userId);
+
+            if (user == null)
+            {
+                throw new CustomException("User not found", 404);
+            }
+
+            // Update the refresh token and expiry
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = refreshTokenExpiry;
+
+            // Save changes to the database
             _userRepository.Update(user);
             await _userRepository.SaveChangesAsync();
-            return userUpdateDto;
         }
+
 
         public async Task<bool> UserExistsAsync(string email)
         {

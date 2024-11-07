@@ -18,5 +18,33 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery]Category category) => 
         Ok(await _service.GetProductsByCategoryAsync(category));
 
+    [HttpGet]
+    [Route("category&product")]
+    public async Task<IActionResult> GetCategoryAndProduct([FromQuery] Category category)
+    {
+        var number = await _service.GetNumberOfProduct(category);
+        var all = await _service.GetAllProductsAsync();
+        var totalPrice =  all.Where(x => x.Category == category).Sum(x => x.Price);
+
+        TotalProduct totalProduct = new TotalProduct()
+        {
+            Category = category,
+            NumberOfProduct = number,
+            TotalPrice = totalPrice
+        };
+
+        return Ok(totalProduct);
+    }
+       
+
+
+}
+
+
+public class TotalProduct
+{
+    public Category Category { get; set; }
+    public int NumberOfProduct { get; set; }
+    public decimal TotalPrice { get; set; }
 }
 

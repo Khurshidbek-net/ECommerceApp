@@ -1,9 +1,5 @@
-﻿using E_Commerce.Domain.Commons;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using E_Commerce.Domain.Commons;
 
 namespace E_Commerce.Domain.Entities
 {
@@ -13,5 +9,7 @@ namespace E_Commerce.Domain.Entities
         public decimal DiscountPercent { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime ExpireDate { get; set; }
+        public string OwnerId { get; set; }
+        public ICollection<Product> Products { get; set; }
     }
 }

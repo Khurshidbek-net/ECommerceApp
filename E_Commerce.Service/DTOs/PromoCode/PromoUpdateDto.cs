@@ -8,9 +8,9 @@ namespace E_Commerce.Service.DTOs.PromoCode
 {
     public class PromoUpdateDto
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Code { get; set; }
         public int DiscountPercent { get; set; }
-        public int ExpireAfterMinutes { get; set; }
+        public DateTime ExpireDate { get; set; }
     }
 }

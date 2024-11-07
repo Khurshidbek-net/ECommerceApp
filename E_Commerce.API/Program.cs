@@ -5,18 +5,19 @@ using E_Commerce.Service.Mappers;
 using E_Commerce.Service.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;    
 }).AddJwtBearer(options =>
 {
-    var jwtSettings = builder.Configuration.GetSection("Jwt");
+    var jwtSettings = builder.Configuration.GetSection("JWT");
     var key = jwtSettings.GetValue<string>("Key");
     var issuer = jwtSettings.GetValue<string>("Issuer");
     var audience = jwtSettings.GetValue<string>("Audience");
@@ -27,8 +28,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidAudience = builder.Configuration["JWT:Audience"],
         IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
@@ -44,7 +45,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "MAI API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerce_App", Version = "v1" });
 
     // Add security definition for JWT
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -100,7 +101,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseStaticFiles();
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+//    RequestPath = "/api/products/images"
+//});
+    
+
+
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 

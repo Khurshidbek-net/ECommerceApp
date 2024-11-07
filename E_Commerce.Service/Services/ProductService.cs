@@ -5,23 +5,32 @@ using E_Commerce.Domain.Enums;
 using E_Commerce.Service.DTOs.Product;
 using E_Commerce.Service.Exceptions;
 using E_Commerce.Service.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace E_Commerce.Service.Services;
 
 public class ProductService : IProductService
 {
     private readonly IGenericRepository<Product> _genericRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMapper _mapper;
 
-    public ProductService(IGenericRepository<Product> genericRepository, IMapper mapper)
+    public ProductService(IGenericRepository<Product> genericRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
     {
         _genericRepository = genericRepository;
         _mapper = mapper;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Product> CreateProductAsync(ProductCreateDto productDto)
     {
         var product = _mapper.Map<Product>(productDto);
+
+        var claims = _httpContextAccessor.HttpContext.User.Claims;
+
+        var userIdClaim = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+        product.OwnerId = userIdClaim;
 
         if (productDto.ImageUrl != null)
         {
@@ -63,6 +72,12 @@ public class ProductService : IProductService
     {
         var products = _genericRepository.GetAll(null!);
         return await Task.FromResult(products);
+    }
+
+    public async Task<int> GetNumberOfProduct(Category category)
+    {
+        var products = _genericRepository.GetAll(x => x.Category == category);
+        return Task.FromResult(products.Count()).Result;
     }
 
     public async Task<Product> GetProductByIdAsync(long id)
@@ -109,8 +124,25 @@ public class ProductService : IProductService
             existingProduct.ImageUrl = $"/images/{productDto.ImageUrl.FileName}";
         }
 
+
+
         _genericRepository.Update(existingProduct);
-        await _genericRepository.SaveChangesAsync(); // Awaiting the save changes call
+        await _genericRepository.SaveChangesAsync(); 
         return existingProduct;
+    }
+
+    public async Task<bool> ApplyPromoCodes(IEnumerable<Product> products, long promoId)
+    {
+        var productsIds = products.Select(x => x.Id).ToList();
+
+        foreach (var product in products)
+        {
+            product.PromocodeId = promoId;
+            _genericRepository.Update(product);
+            await _genericRepository.SaveChangesAsync();
+        }
+
+
+        return true;
     }
 }

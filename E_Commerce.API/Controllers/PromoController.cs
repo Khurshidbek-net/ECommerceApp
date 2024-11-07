@@ -2,8 +2,11 @@
 using E_Commerce.Domain.Entities;
 using E_Commerce.Service.DTOs.PromoCode;
 using E_Commerce.Service.Interfaces;
+using E_Commerce.Service.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace E_Commerce.API.Controllers
 {
@@ -21,8 +24,20 @@ namespace E_Commerce.API.Controllers
         }
 
         [HttpGet("get-all-promos")]
-        public async Task<ActionResult<IEnumerable<PromoCode>>> GetAllPromos() 
-            => Ok(await _promoService.GetAllCodes());
+        public async Task<ActionResult<IEnumerable<PromoCode>>> GetAllPromos()
+        {
+            var promos = await _promoService.GetAllCodes();
+
+            foreach (var promo in promos)
+            {
+                promo.IsActive = promo.ExpireDate >= DateTime.Now;
+                var updatePromo = _map.Map<PromoUpdateDto>(promo);
+                updatePromo.ExpireDate = promo.ExpireDate;
+                await _promoService.UpdatePromoCode(updatePromo);
+            }
+
+            return Ok(promos);
+        }
 
         [HttpGet("active")]
         [Authorize(Roles = "ProductOwner")]
@@ -35,10 +50,10 @@ namespace E_Commerce.API.Controllers
             => Ok(await _promoService.GetInActivePromoCodes());
 
 
-        [HttpGet("get-by-code/{code}")]
-        public async Task<ActionResult<PromoCode>> GetPromo(long code)
+        [HttpGet("get-by-id/{id}")]
+        public async Task<ActionResult<PromoCode>> GetPromo(long id)
         {
-            var promo = await _promoService.GetPromoCode(code);
+            var promo = await _promoService.GetPromoCodeById(id);
             var updatePromo = _map.Map<PromoUpdateDto>(promo);
 
             if (promo == null)
@@ -46,40 +61,121 @@ namespace E_Commerce.API.Controllers
                 return NotFound("Promo code not found.");
             }
 
-            if (promo.ExpireDate <= DateTime.UtcNow)
-            {
-                promo.IsActive = false;
-                await _promoService.UpdatePromoCode(updatePromo);
-            }
+            
+            
 
             return Ok(promo);
         }
 
+        [HttpGet("get-my-promos/{id}")]
+        public async Task<IActionResult> GetPromos(long id)
+        {
+            var promos = await _promoService.GetAllCodes();
+            var myPromos = promos.Where(x => x.OwnerId == id.ToString());
+            if(myPromos == null)
+                return NotFound("Promo code not found.");
 
-        //[Authorize(Roles = "ProductOwner")]
-        [HttpPost("create-promo")]
-        public async Task<ActionResult<PromoCode>> CreatePromo([FromForm] PromoCreateDto promoCode)
-            => Ok(await _promoService.CreatePromoCode(promoCode));
+            foreach (var promo in myPromos)
+            {
+                promo.IsActive = promo.ExpireDate >= DateTime.Now;
+                var updatePromo = _map.Map<PromoUpdateDto>(promo);
+                updatePromo.ExpireDate = promo.ExpireDate;
+                await _promoService.UpdatePromoCode(updatePromo);
+            }
+            return Ok(myPromos);
+        }
+
 
         [Authorize(Roles = "ProductOwner")]
-        [HttpPut("update-promo")]
-        public async Task<ActionResult<PromoCode>> UpdatePromo([FromForm] PromoUpdateDto promoCode)
+        [HttpPost("create-promo")]
+        public async Task<ActionResult<PromoCode>> CreatePromo([FromForm] PromoCreateDto promoCode)
         {
-            if(promoCode == null)
+            var access = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+            var handler = new JwtSecurityTokenHandler();
+            string userRoleClaim;
+            string userIdClaim;
+
+            try
+            {
+                var token = handler.ReadJwtToken(access);
+                userRoleClaim = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+                userIdClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return BadRequest("Owner ID not found in token.");
+                }
+
+                if (userRoleClaim != "ProductOwner")
+                {
+                    return Forbid("You are not authorized to perform this action.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Token error: {ex.Message}");
+                return StatusCode(500, "Error processing the access token.");
+            }
+
+            // Create a new product object
+            var newPromo = new PromoCode
+            {
+                OwnerId = userIdClaim
+            };
+
+            try
+            {
+                var createdPromo = await _promoService.CreatePromoCode(promoCode);
+                return Ok(createdPromo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating product: {ex.Message}");
+                return StatusCode(500, "Error creating the product.");
+            }
+
+        }
+
+        //[Authorize(Roles = "ProductOwner")]
+        [HttpPut("update-promo")]
+        public async Task<ActionResult<PromoCode>> UpdatePromo(long id, [FromBody] PromoUpdateDto promoUpdateDto)
+        {
+            if (promoUpdateDto == null)
+            {
+                return BadRequest("Promo update data is required.");
+            }
+
+            if(id != promoUpdateDto.Id)
+            {
+                return BadRequest("Invalid promo code ID provided.");
+            }
+
+            // Fetch all promo codes and find the specific promo code by the provided code
+            var promo = await _promoService.GetPromoCodeById(id);
+            //GetPromo();
+
+            if (promo == null)
             {
                 return NotFound("Promo code not found.");
             }
-            return Ok(await _promoService.UpdatePromoCode(promoCode));
+
+
+            // Update the promo code in the database
+            var updatedPromo = await _promoService.UpdatePromoCode(promoUpdateDto);
+
+            return Ok(updatedPromo);
         }
 
-        [Authorize(Roles = "ProductOwner")]
-        [HttpDelete("{id:long}")]
-        public async Task<IActionResult> DeletePromo(long id)
+        //[Authorize(Roles = "ProductOwner")]
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeletePromo(string code)
         {
-            var promo = await _promoService.GetPromoCode(id);
+            var codes = _promoService.GetAllCodes();
+            var promo = codes.Result.FirstOrDefault(x => x.Code == code);
             if (promo is null)
                 return NotFound("Promo code not found");
-            await _promoService.DeletePromoCode(id);
+            await _promoService.DeletePromoCode(promo.Id);
             return Ok("Promo code deleted");
         }
 
